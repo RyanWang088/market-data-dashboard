@@ -6,11 +6,15 @@ statistical agencies, reconcile it against itself, and show the pipeline doing t
 Each board is a single `.dc.html` file. There is no build step and no server — open one in a
 browser and it fetches, caches, validates and paints on its own.
 
-| Board | Region | Providers | Series |
+| Board | Region | Providers | Feeds |
 |---|---|---|---|
 | `Euro Operations Board.dc.html` | Euro area | ECB SDMX, World Bank | 15 |
-| `Singapore Operations Board.dc.html` | Singapore | SingStat Table Builder (MAS, DOS, MOM) | 6 tables |
+| `Singapore Operations Board.dc.html` | Singapore | SingStat Table Builder (MAS, DOS, MOM) | 6 |
 | `US Operations Board.dc.html` | United States | US Treasury, BLS, Alpha Vantage | 8 |
+
+A feed is one thing the scheduler fetches: its own TTL, its own cache entry, its own row in
+the health panel. It is the number each board counts in its "Feeds live" stat. Singapore's six
+pull several data rows apiece, because SingStat is queried a table at a time.
 
 ## The idea
 
