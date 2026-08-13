@@ -1,0 +1,922 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="_ds/modernist-7b7601eb-07a3-4f5b-8a58-85cdc4e564b5/styles.css">
+<script src="_ds/modernist-7b7601eb-07a3-4f5b-8a58-85cdc4e564b5/_ds_bundle.js"></script>
+<style>
+  body { margin: 0; background: var(--color-bg); }
+  a { color: var(--color-accent-700); text-decoration: none; border-bottom: 1px solid var(--color-accent-300); }
+  a:hover { color: var(--color-accent); border-bottom-color: var(--color-accent); }
+  @keyframes msdPulse { 0% { opacity: .2 } 50% { opacity: 1 } 100% { opacity: .2 } }
+</style>
+</helmet>
+
+<div style="min-height:100vh;background:var(--color-bg);font-family:var(--font-body);color:var(--color-text)">
+
+  <div style="display:flex;align-items:flex-end;justify-content:space-between;gap:40px;padding:28px 40px 16px;border-bottom:2px solid var(--color-text)">
+    <div style="display:flex;flex-direction:column;gap:5px">
+      <span style="font:600 10.5px/1.2 var(--font-body);letter-spacing:.18em;text-transform:uppercase;color:var(--color-accent-700)">Live · US Treasury · Bureau of Labor Statistics</span>
+      <h1 style="margin:0;font:800 27px/1.1 var(--font-heading);letter-spacing:-.015em">US macro operations board</h1>
+    </div>
+    <p style="margin:0;font:400 12.5px/1.55 var(--font-body);color:var(--color-neutral-700);max-width:66ch;text-wrap:pretty">Release-driven, not tick-driven. Payrolls and CPI publish monthly, the Treasury curve daily — so the scheduler runs on publication calendars and a request budget, and every figure is shown nominal against real. Right of the rule: what the system is doing to stay honest about it.</p>
+  </div>
+
+  <div style="padding:24px 40px 40px">
+    <div style="border:2px solid var(--color-text);background:var(--color-bg);min-width:1180px">
+
+      <div style="display:flex;align-items:stretch;justify-content:space-between;border-bottom:2px solid var(--color-text)">
+        <div style="padding:18px 22px;display:flex;flex-direction:column;gap:4px">
+          <span style="font:600 10.5px/1.2 var(--font-body);letter-spacing:.16em;text-transform:uppercase;color:var(--color-accent-700)">United States · rates, prices, labour</span>
+          <span style="font:800 22px/1.15 var(--font-heading)">Nominal against real</span>
+        </div>
+        <div style="display:flex;align-items:center">
+          <div style="padding:0 22px;border-left:2px solid var(--color-text);display:flex;flex-direction:column;gap:3px;min-width:118px">
+            <span style="font:600 10px/1.2 var(--font-body);letter-spacing:.14em;text-transform:uppercase;color:var(--color-neutral-700)">Feeds live</span>
+            <span style="font:800 17px/1 var(--font-heading);font-variant-numeric:tabular-nums">{{ feedsOk }}/{{ feedsTotal }}</span>
+          </div>
+          <div style="padding:0 22px;border-left:2px solid var(--color-text);display:flex;flex-direction:column;gap:3px;min-width:142px">
+            <span style="font:600 10px/1.2 var(--font-body);letter-spacing:.14em;text-transform:uppercase;color:var(--color-neutral-700)">BLS daily budget</span>
+            <span style="font:800 17px/1 var(--font-heading);font-variant-numeric:tabular-nums;color:{{ budgetTone }}">{{ blsUsed }}/{{ blsCap }} used</span>
+          </div>
+          <div style="padding:0 22px;border-left:2px solid var(--color-text);display:flex;flex-direction:column;gap:3px;min-width:132px">
+            <span style="font:600 10px/1.2 var(--font-body);letter-spacing:.14em;text-transform:uppercase;color:var(--color-neutral-700)">Cache hit rate</span>
+            <span style="font:800 17px/1 var(--font-heading);font-variant-numeric:tabular-nums">{{ hitRate }}</span>
+          </div>
+          <div style="padding:0 22px;border-left:2px solid var(--color-text);display:flex;flex-direction:column;gap:3px;min-width:150px">
+            <span style="font:600 10px/1.2 var(--font-body);letter-spacing:.14em;text-transform:uppercase;color:var(--color-neutral-700)">Next revalidate</span>
+            <span style="font:800 17px/1 var(--font-heading);font-variant-numeric:tabular-nums">{{ nextIn }}s · cycle {{ tick }}</span>
+          </div>
+          <button class="btn btn-primary btn-block" onClick="{{ refresh }}" style="height:100%;width:auto;border:none;border-left:2px solid var(--color-text);min-width:158px;justify-content:flex-start;text-align:left">Revalidate now</button>
+        </div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:minmax(0,1fr) 372px">
+        <div style="display:flex;flex-direction:column;border-right:2px solid var(--color-text)">
+
+          <div style="padding:22px;border-bottom:2px solid var(--color-text)">
+            <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:24px;margin-bottom:14px">
+              <div>
+                <span style="font:600 10.5px/1.2 var(--font-body);letter-spacing:.14em;text-transform:uppercase;color:var(--color-neutral-700)">The Treasury par yield curve, nominal and deflated · {{ curveDate }}</span>
+                <p style="margin:6px 0 0;font:400 12.5px/1.5 var(--font-body);color:var(--color-neutral-700);max-width:64ch;text-wrap:pretty">Why this panel: the whole term structure at once, then the same curve less CPI. The shaded wedge is inflation — what the nominal line promises and the real line actually delivers.</p>
+              </div>
+              <div style="display:flex;gap:24px;text-align:right">
+                <div>
+                  <div style="font:600 10px/1.2 var(--font-body);letter-spacing:.12em;text-transform:uppercase;color:var(--color-neutral-700)">Nominal 10Y</div>
+                  <div style="font:800 30px/1 var(--font-heading);font-variant-numeric:tabular-nums">{{ nom10 }}</div>
+                </div>
+                <div>
+                  <div style="font:600 10px/1.2 var(--font-body);letter-spacing:.12em;text-transform:uppercase;color:var(--color-neutral-700)">Real 10Y</div>
+                  <div style="font:800 30px/1 var(--font-heading);font-variant-numeric:tabular-nums;color:var(--color-accent-700)">{{ real10 }}</div>
+                </div>
+                <div>
+                  <div style="font:600 10px/1.2 var(--font-body);letter-spacing:.12em;text-transform:uppercase;color:var(--color-neutral-700)">10Y − 2Y</div>
+                  <div style="font:800 30px/1 var(--font-heading);font-variant-numeric:tabular-nums">{{ slope }}</div>
+                </div>
+              </div>
+            </div>
+            <div style="position:relative;padding-left:48px">
+              <sc-for list="{{ curveTicks }}" as="t" hint-placeholder-count="4">
+                <span style="position:absolute;left:0;width:42px;text-align:right;top:{{ t.pct }};transform:translateY(-50%);font:400 10.5px/1 var(--font-body);font-variant-numeric:tabular-nums;color:var(--color-neutral-600)">{{ t.v }}</span>
+              </sc-for>
+              <svg viewBox="0 0 600 200" preserveAspectRatio="none" style="width:100%;height:236px;display:block;border-left:2px solid var(--color-text);border-bottom:2px solid var(--color-text)">
+                <sc-for list="{{ curveTicks }}" as="t" hint-placeholder-count="4">
+                  <line x1="0" x2="600" y1="{{ t.y }}" y2="{{ t.y }}" stroke="var(--color-neutral-300)" stroke-width="1" vector-effect="non-scaling-stroke"></line>
+                </sc-for>
+                <line x1="0" x2="600" y1="{{ curveZeroY }}" y2="{{ curveZeroY }}" stroke="var(--color-neutral-600)" stroke-width="1.5" stroke-dasharray="3 3" vector-effect="non-scaling-stroke"></line>
+                <path d="{{ curveBand }}" fill="var(--color-accent-200)" opacity="0.72"></path>
+                <path d="{{ curveReal }}" fill="none" stroke="var(--color-accent)" stroke-width="2.5" vector-effect="non-scaling-stroke"></path>
+                <path d="{{ curveNominal }}" fill="none" stroke="var(--color-text)" stroke-width="2.5" vector-effect="non-scaling-stroke"></path>
+                <sc-for list="{{ curvePts }}" as="p" hint-placeholder-count="13">
+                  <circle cx="{{ p.x }}" cy="{{ p.y }}" r="3" fill="var(--color-text)" vector-effect="non-scaling-stroke"></circle>
+                </sc-for>
+              </svg>
+              <div style="position:relative;height:14px;margin-top:6px">
+                <sc-for list="{{ curveLabels }}" as="m" hint-placeholder-count="8">
+                  <span style="position:absolute;left:{{ m.pct }};transform:translateX(-50%);font:400 10.5px/1 var(--font-body);font-variant-numeric:tabular-nums;color:var(--color-neutral-600)">{{ m.t }}</span>
+                </sc-for>
+              </div>
+            </div>
+            <div style="display:flex;gap:20px;margin-top:10px;padding-left:48px;font:400 11.5px/1.3 var(--font-body);color:var(--color-neutral-700);flex-wrap:wrap">
+              <span style="display:flex;align-items:center;gap:6px"><span style="width:16px;height:2.5px;background:var(--color-text)"></span>Nominal par yield</span>
+              <span style="display:flex;align-items:center;gap:6px"><span style="width:16px;height:2.5px;background:var(--color-accent)"></span>Real, less CPI {{ cpiYoY }} ({{ cpiRef }})</span>
+              <span style="color:var(--color-neutral-600)">Maturity axis is log-scaled · Treasury publishes this curve once each business day around 15:30 ET</span>
+            </div>
+          </div>
+
+          <div style="display:grid;grid-template-columns:1fr 1fr;border-bottom:2px solid var(--color-text)">
+            <div style="padding:22px;border-right:2px solid var(--color-text);display:flex;flex-direction:column;gap:10px">
+              <span style="font:600 10.5px/1.2 var(--font-body);letter-spacing:.14em;text-transform:uppercase;color:var(--color-neutral-700)">Are workers actually better off?</span>
+              <div style="display:flex;align-items:flex-end;gap:22px">
+                <div>
+                  <div style="font:800 44px/.95 var(--font-heading);font-variant-numeric:tabular-nums;color:{{ realWageTone }}">{{ realWage }}</div>
+                  <div style="font:400 11.5px/1.3 var(--font-body);color:var(--color-neutral-700);margin-top:5px">Real average hourly earnings, YoY</div>
+                </div>
+              </div>
+              <div style="display:flex;gap:22px;padding-top:4px">
+                <div>
+                  <div style="font:600 18px/1 var(--font-heading);font-variant-numeric:tabular-nums">{{ aheYoY }}</div>
+                  <div style="font:400 11px/1.3 var(--font-body);color:var(--color-neutral-700);margin-top:3px">Nominal wages</div>
+                </div>
+                <div style="font:400 18px/1 var(--font-body);color:var(--color-neutral-600)">−</div>
+                <div>
+                  <div style="font:600 18px/1 var(--font-heading);font-variant-numeric:tabular-nums">{{ cpiYoY2 }}</div>
+                  <div style="font:400 11px/1.3 var(--font-body);color:var(--color-neutral-700);margin-top:3px">CPI-U, SA</div>
+                </div>
+                <div style="font:400 18px/1 var(--font-body);color:var(--color-neutral-600)">=</div>
+                <div>
+                  <div style="font:600 18px/1 var(--font-heading);font-variant-numeric:tabular-nums;color:{{ realWageTone }}">{{ realWage }}</div>
+                  <div style="font:400 11px/1.3 var(--font-body);color:var(--color-neutral-700);margin-top:3px">Real</div>
+                </div>
+              </div>
+              <p style="margin:4px 0 0;font:400 12px/1.5 var(--font-body);color:var(--color-neutral-700);text-wrap:pretty">Why this panel: a pay rise is a nominal number. Only the difference against CPI tells you whether an hour of work buys more than it did a year ago — the single clearest real-vs-nominal question in macro.</p>
+            </div>
+            <div style="padding:22px;display:flex;flex-direction:column;gap:10px">
+              <div style="display:flex;align-items:baseline;justify-content:space-between;gap:12px">
+                <span style="font:600 10.5px/1.2 var(--font-body);letter-spacing:.14em;text-transform:uppercase;color:var(--color-neutral-700)">Non-farm payrolls · {{ nfpRef }}</span>
+                <span style="font:600 9.5px/1 var(--font-body);letter-spacing:.08em;text-transform:uppercase;padding:3px 6px;background:{{ nfpFlagBg }};color:{{ nfpFlagFg }}">{{ nfpFlag }}</span>
+              </div>
+              <div style="display:flex;align-items:flex-end;gap:22px">
+                <div>
+                  <div style="font:800 44px/.95 var(--font-heading);font-variant-numeric:tabular-nums">{{ nfpChange }}</div>
+                  <div style="font:400 11.5px/1.3 var(--font-body);color:var(--color-neutral-700);margin-top:5px">Jobs added, month on month</div>
+                </div>
+                <div>
+                  <div style="font:600 18px/1 var(--font-heading);font-variant-numeric:tabular-nums;color:var(--color-neutral-700)">{{ nfpLevel }}</div>
+                  <div style="font:400 11px/1.3 var(--font-body);color:var(--color-neutral-700);margin-top:3px">Total employed</div>
+                </div>
+                <div>
+                  <div style="font:600 18px/1 var(--font-heading);font-variant-numeric:tabular-nums;color:var(--color-neutral-700)">{{ unrate }}</div>
+                  <div style="font:400 11px/1.3 var(--font-body);color:var(--color-neutral-700);margin-top:3px">Unemployment</div>
+                </div>
+              </div>
+              <svg viewBox="0 0 260 52" preserveAspectRatio="none" style="width:100%;height:58px;display:block;margin-top:2px">
+                <line x1="0" x2="260" y1="{{ nfpZeroY }}" y2="{{ nfpZeroY }}" stroke="var(--color-neutral-600)" stroke-width="1" vector-effect="non-scaling-stroke"></line>
+                <sc-for list="{{ nfpBars }}" as="b" hint-placeholder-count="12">
+                  <rect x="{{ b.x }}" y="{{ b.y }}" width="{{ b.w }}" height="{{ b.h }}" fill="{{ b.fill }}"></rect>
+                </sc-for>
+              </svg>
+              <p style="margin:0;font:400 12px/1.5 var(--font-body);color:var(--color-neutral-700);text-wrap:pretty">Last 12 monthly changes. The two most recent months carry BLS's <em>preliminary</em> footnote — they will be revised, often by more than the headline itself. A dashboard that hides that is lying by omission.</p>
+            </div>
+          </div>
+
+          <div style="padding:22px;border-bottom:2px solid var(--color-text)">
+            <span style="font:600 10.5px/1.2 var(--font-body);letter-spacing:.14em;text-transform:uppercase;color:var(--color-neutral-700)">The curve, deflated — Fisher approximation</span>
+            <p style="margin:6px 0 14px;font:400 12.5px/1.5 var(--font-body);color:var(--color-neutral-700);max-width:80ch;text-wrap:pretty">Why this panel: every quoted Treasury yield is nominal. Subtracting CPI gives the real rate — the number that says whether money is genuinely tight. Field names are the Treasury's own, so any figure can be re-fetched from source.</p>
+            <table style="width:100%;border-collapse:collapse">
+              <thead>
+                <tr>
+                  <th style="text-align:left;font:600 10px/1.2 var(--font-body);letter-spacing:.1em;text-transform:uppercase;color:var(--color-neutral-700);padding:0 12px 8px 0;border-bottom:2px solid var(--color-text)">Maturity</th>
+                  <th style="text-align:left;font:600 10px/1.2 var(--font-body);letter-spacing:.1em;text-transform:uppercase;color:var(--color-neutral-700);padding:0 12px 8px 0;border-bottom:2px solid var(--color-text)">Treasury field</th>
+                  <th style="text-align:right;font:600 10px/1.2 var(--font-body);letter-spacing:.1em;text-transform:uppercase;color:var(--color-neutral-700);padding:0 12px 8px 0;border-bottom:2px solid var(--color-text)">Nominal</th>
+                  <th style="text-align:right;font:600 10px/1.2 var(--font-body);letter-spacing:.1em;text-transform:uppercase;color:var(--color-neutral-700);padding:0 12px 8px 0;border-bottom:2px solid var(--color-text)">less CPI</th>
+                  <th style="text-align:right;font:600 10px/1.2 var(--font-body);letter-spacing:.1em;text-transform:uppercase;color:var(--color-neutral-700);padding:0 12px 8px 0;border-bottom:2px solid var(--color-text)">Real</th>
+                  <th style="text-align:right;font:600 10px/1.2 var(--font-body);letter-spacing:.1em;text-transform:uppercase;color:var(--color-neutral-700);padding:0 0 8px 0;border-bottom:2px solid var(--color-text)">As of</th>
+                </tr>
+              </thead>
+              <tbody>
+                <sc-for list="{{ rates }}" as="r" hint-placeholder-count="7">
+                  <tr>
+                    <td style="font:600 13.5px/1.35 var(--font-body);padding:10px 12px 10px 0;border-bottom:1px solid var(--color-neutral-300)">{{ r.label }}</td>
+                    <td style="font:400 11px/1.35 var(--font-body);color:var(--color-neutral-600);padding:10px 12px 10px 0;border-bottom:1px solid var(--color-neutral-300)">{{ r.key }}</td>
+                    <td style="text-align:right;font:400 13.5px/1.35 var(--font-body);font-variant-numeric:tabular-nums;padding:10px 12px 10px 0;border-bottom:1px solid var(--color-neutral-300)">{{ r.nominal }}</td>
+                    <td style="text-align:right;font:400 13.5px/1.35 var(--font-body);font-variant-numeric:tabular-nums;color:var(--color-neutral-600);padding:10px 12px 10px 0;border-bottom:1px solid var(--color-neutral-300)">{{ r.minus }}</td>
+                    <td style="text-align:right;font:600 13.5px/1.35 var(--font-body);font-variant-numeric:tabular-nums;padding:10px 12px 10px 0;border-bottom:1px solid var(--color-neutral-300);color:{{ r.tone }}">{{ r.real }}</td>
+                    <td style="text-align:right;font:400 12px/1.35 var(--font-body);font-variant-numeric:tabular-nums;color:var(--color-neutral-600);padding:10px 0;border-bottom:1px solid var(--color-neutral-300)">{{ r.asOf }}</td>
+                  </tr>
+                </sc-for>
+              </tbody>
+            </table>
+          </div>
+
+          <div style="padding:22px;border-bottom:2px solid var(--color-text)">
+            <div style="display:flex;align-items:baseline;justify-content:space-between;gap:20px">
+              <span style="font:600 10.5px/1.2 var(--font-body);letter-spacing:.14em;text-transform:uppercase;color:var(--color-accent-700)">Cross-source reconciliation — two providers, one concept</span>
+              <span style="font:600 9.5px/1 var(--font-body);letter-spacing:.08em;text-transform:uppercase;padding:4px 7px;background:{{ reconBg }};color:{{ reconFg }}">{{ reconVerdict }}</span>
+            </div>
+            <p style="margin:6px 0 14px;font:400 12.5px/1.5 var(--font-body);color:var(--color-neutral-700);max-width:80ch;text-wrap:pretty">Why this panel: the same headline series, pulled from two independent providers, does not always agree. A board that shows one number implies a certainty it does not have. This one fetches both, prints the gap, and refuses to average them.</p>
+            <table style="width:100%;border-collapse:collapse">
+              <thead>
+                <tr>
+                  <th style="text-align:left;font:600 10px/1.2 var(--font-body);letter-spacing:.1em;text-transform:uppercase;color:var(--color-neutral-700);padding:0 12px 8px 0;border-bottom:2px solid var(--color-text)">Series</th>
+                  <th style="text-align:right;font:600 10px/1.2 var(--font-body);letter-spacing:.1em;text-transform:uppercase;color:var(--color-neutral-700);padding:0 12px 8px 0;border-bottom:2px solid var(--color-text)">BLS (source of record)</th>
+                  <th style="text-align:right;font:600 10px/1.2 var(--font-body);letter-spacing:.1em;text-transform:uppercase;color:var(--color-neutral-700);padding:0 12px 8px 0;border-bottom:2px solid var(--color-text)">Alpha Vantage</th>
+                  <th style="text-align:right;font:600 10px/1.2 var(--font-body);letter-spacing:.1em;text-transform:uppercase;color:var(--color-neutral-700);padding:0 12px 8px 0;border-bottom:2px solid var(--color-text)">Δ</th>
+                  <th style="text-align:left;font:600 10px/1.2 var(--font-body);letter-spacing:.1em;text-transform:uppercase;color:var(--color-neutral-700);padding:0 0 8px 0;border-bottom:2px solid var(--color-text)">Assessment</th>
+                </tr>
+              </thead>
+              <tbody>
+                <sc-for list="{{ recon }}" as="r" hint-placeholder-count="2">
+                  <tr>
+                    <td style="font:600 13.5px/1.35 var(--font-body);padding:11px 12px 11px 0;border-bottom:1px solid var(--color-neutral-300)">{{ r.label }} <span style="font:400 11px/1 var(--font-body);color:var(--color-neutral-600)">{{ r.period }}</span></td>
+                    <td style="text-align:right;font:400 13.5px/1.35 var(--font-body);font-variant-numeric:tabular-nums;padding:11px 12px 11px 0;border-bottom:1px solid var(--color-neutral-300)">{{ r.a }}</td>
+                    <td style="text-align:right;font:400 13.5px/1.35 var(--font-body);font-variant-numeric:tabular-nums;padding:11px 12px 11px 0;border-bottom:1px solid var(--color-neutral-300)">{{ r.b }}</td>
+                    <td style="text-align:right;font:600 13.5px/1.35 var(--font-body);font-variant-numeric:tabular-nums;padding:11px 12px 11px 0;border-bottom:1px solid var(--color-neutral-300);color:{{ r.tone }}">{{ r.delta }}</td>
+                    <td style="font:400 12px/1.45 var(--font-body);color:var(--color-neutral-700);padding:11px 0;border-bottom:1px solid var(--color-neutral-300);max-width:38ch">{{ r.note }}</td>
+                  </tr>
+                </sc-for>
+              </tbody>
+            </table>
+          </div>
+
+          <div style="padding:22px;display:flex;flex-direction:column;gap:10px">
+            <span style="font:600 10.5px/1.2 var(--font-body);letter-spacing:.14em;text-transform:uppercase;color:var(--color-accent-700)">Reading — generated from the values above</span>
+            <sc-for list="{{ reading }}" as="p" hint-placeholder-count="5">
+              <p style="margin:0;font:400 14px/1.6 var(--font-body);max-width:88ch;text-wrap:pretty">{{ p }}</p>
+            </sc-for>
+          </div>
+        </div>
+
+        <aside style="display:flex;flex-direction:column;background:var(--color-neutral-200)">
+          <div style="padding:18px 20px;border-bottom:2px solid var(--color-text)">
+            <span style="font:600 10.5px/1.2 var(--font-body);letter-spacing:.14em;text-transform:uppercase;color:var(--color-neutral-700)">Pipeline · one cycle</span>
+            <div style="display:flex;flex-direction:column;gap:1px;margin-top:12px">
+              <sc-for list="{{ stages }}" as="s" hint-placeholder-count="5">
+                <div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--color-neutral-400)">
+                  <span style="width:9px;height:9px;flex:none;background:{{ s.bg }};animation:{{ s.anim }}"></span>
+                  <span style="font:600 11.5px/1.2 var(--font-body);letter-spacing:.06em;width:78px;flex:none">{{ s.name }}</span>
+                  <span style="font:400 11px/1.3 var(--font-body);color:var(--color-neutral-700);font-variant-numeric:tabular-nums">{{ s.detail }}</span>
+                </div>
+              </sc-for>
+            </div>
+            <p style="margin:10px 0 0;font:400 11.5px/1.5 var(--font-body);color:var(--color-neutral-700);text-wrap:pretty">Fetch is capped at {{ conc }} concurrent requests. BLS serves one series per GET — its batch POST fails CORS preflight from a browser — so five series cost five requests against a {{ blsCap }}/day unregistered cap. That constraint, not taste, is what sets the {{ blsTtlLabel }} TTL.</p>
+          </div>
+
+          <div style="padding:18px 20px;border-bottom:2px solid var(--color-text)">
+            <span style="font:600 10.5px/1.2 var(--font-body);letter-spacing:.14em;text-transform:uppercase;color:var(--color-neutral-700)">Release calendar &amp; staleness</span>
+            <p style="margin:6px 0 10px;font:400 11.5px/1.45 var(--font-body);color:var(--color-neutral-700);text-wrap:pretty">Publication lag is not fetch latency. A CPI print seconds old over the wire can still describe a month that ended weeks ago.</p>
+            <div style="display:flex;flex-direction:column;gap:1px">
+              <sc-for list="{{ releases }}" as="r" hint-placeholder-count="4">
+                <div style="display:flex;align-items:baseline;justify-content:space-between;gap:8px;padding:7px 0;border-bottom:1px solid var(--color-neutral-400)">
+                  <span style="font:600 11.5px/1.3 var(--font-body);flex:none">{{ r.name }}</span>
+                  <span style="font:400 10.5px/1.3 var(--font-body);color:var(--color-neutral-700);text-align:right;font-variant-numeric:tabular-nums">{{ r.detail }}</span>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+
+          <div style="padding:18px 20px;border-bottom:2px solid var(--color-text)">
+            <span style="font:600 10.5px/1.2 var(--font-body);letter-spacing:.14em;text-transform:uppercase;color:var(--color-neutral-700)">Source health</span>
+            <table style="width:100%;border-collapse:collapse;margin-top:10px">
+              <thead>
+                <tr>
+                  <th style="text-align:left;font:600 9.5px/1.2 var(--font-body);letter-spacing:.08em;text-transform:uppercase;color:var(--color-neutral-700);padding:0 6px 6px 0;border-bottom:2px solid var(--color-text)">Series</th>
+                  <th style="text-align:right;font:600 9.5px/1.2 var(--font-body);letter-spacing:.08em;text-transform:uppercase;color:var(--color-neutral-700);padding:0 6px 6px 0;border-bottom:2px solid var(--color-text)">ms</th>
+                  <th style="text-align:right;font:600 9.5px/1.2 var(--font-body);letter-spacing:.08em;text-transform:uppercase;color:var(--color-neutral-700);padding:0 6px 6px 0;border-bottom:2px solid var(--color-text)">Age</th>
+                  <th style="text-align:right;font:600 9.5px/1.2 var(--font-body);letter-spacing:.08em;text-transform:uppercase;color:var(--color-neutral-700);padding:0 0 6px 0;border-bottom:2px solid var(--color-text)">State</th>
+                </tr>
+              </thead>
+              <tbody>
+                <sc-for list="{{ sources }}" as="s" hint-placeholder-count="8">
+                  <tr>
+                    <td style="font:400 11px/1.3 var(--font-body);padding:6px 6px 6px 0;border-bottom:1px solid var(--color-neutral-400)">{{ s.id }} <span style="color:var(--color-neutral-600)">{{ s.prov }}</span></td>
+                    <td style="text-align:right;font:400 11px/1.3 var(--font-body);font-variant-numeric:tabular-nums;padding:6px 6px 6px 0;border-bottom:1px solid var(--color-neutral-400)">{{ s.latency }}</td>
+                    <td style="text-align:right;font:400 11px/1.3 var(--font-body);font-variant-numeric:tabular-nums;color:var(--color-neutral-700);padding:6px 6px 6px 0;border-bottom:1px solid var(--color-neutral-400)">{{ s.age }}</td>
+                    <td style="text-align:right;padding:6px 0;border-bottom:1px solid var(--color-neutral-400)"><span style="font:600 9.5px/1 var(--font-body);letter-spacing:.08em;text-transform:uppercase;padding:3px 5px;background:{{ s.bg }};color:{{ s.fg }}">{{ s.state }}</span></td>
+                  </tr>
+                </sc-for>
+              </tbody>
+            </table>
+          </div>
+
+          <div style="padding:18px 20px;border-bottom:2px solid var(--color-text);display:grid;grid-template-columns:1fr 1fr;gap:14px">
+            <div>
+              <div style="font:600 9.5px/1.2 var(--font-body);letter-spacing:.12em;text-transform:uppercase;color:var(--color-neutral-700)">Requests issued</div>
+              <div style="font:800 19px/1 var(--font-heading);font-variant-numeric:tabular-nums;margin-top:3px">{{ reqs }}</div>
+            </div>
+            <div>
+              <div style="font:600 9.5px/1.2 var(--font-body);letter-spacing:.12em;text-transform:uppercase;color:var(--color-neutral-700)">Served from cache</div>
+              <div style="font:800 19px/1 var(--font-heading);font-variant-numeric:tabular-nums;margin-top:3px">{{ hits }}</div>
+            </div>
+            <div>
+              <div style="font:600 9.5px/1.2 var(--font-body);letter-spacing:.12em;text-transform:uppercase;color:var(--color-neutral-700)">Retries</div>
+              <div style="font:800 19px/1 var(--font-heading);font-variant-numeric:tabular-nums;margin-top:3px">{{ retries }}</div>
+            </div>
+            <div>
+              <div style="font:600 9.5px/1.2 var(--font-body);letter-spacing:.12em;text-transform:uppercase;color:var(--color-neutral-700)">Rejected by validator</div>
+              <div style="font:800 19px/1 var(--font-heading);font-variant-numeric:tabular-nums;margin-top:3px;color:{{ rejectTone }}">{{ rejects }}</div>
+            </div>
+            <div style="grid-column:1/-1">
+              <p style="margin:0;font:400 11.5px/1.5 var(--font-body);color:var(--color-neutral-700);text-wrap:pretty">Budget-aware scheduling: when a series is inside its TTL the cycle skips it entirely. A cycle that issues zero requests is the correct outcome for monthly data, not a broken one.</p>
+            </div>
+          </div>
+
+          <sc-if value="{{ showFaults }}" hint-placeholder-val="{{ true }}">
+            <div style="padding:18px 20px;border-bottom:2px solid var(--color-text)">
+              <span style="font:600 10.5px/1.2 var(--font-body);letter-spacing:.14em;text-transform:uppercase;color:var(--color-accent-700)">Fault injection</span>
+              <p style="margin:6px 0 12px;font:400 11.5px/1.5 var(--font-body);color:var(--color-neutral-700);text-wrap:pretty">Break it on purpose. The board keeps serving last-known-good values and marks them stale rather than showing a blank or a zero.</p>
+              <div style="display:flex;flex-direction:column;gap:8px">
+                <button onClick="{{ toggleKill }}" style="all:unset;cursor:pointer;display:flex;align-items:center;gap:10px;border:2px solid var(--color-text);padding:9px 11px;font:600 11.5px/1.2 var(--font-body);background:{{ killBg }};color:{{ killFg }}"><span style="width:8px;height:8px;background:currentColor"></span>Kill BLS endpoint</button>
+                <button onClick="{{ toggleSlow }}" style="all:unset;cursor:pointer;display:flex;align-items:center;gap:10px;border:2px solid var(--color-text);padding:9px 11px;font:600 11.5px/1.2 var(--font-body);background:{{ slowBg }};color:{{ slowFg }}"><span style="width:8px;height:8px;background:currentColor"></span>Add 2s network latency</button>
+                <button onClick="{{ toggleCorrupt }}" style="all:unset;cursor:pointer;display:flex;align-items:center;gap:10px;border:2px solid var(--color-text);padding:9px 11px;font:600 11.5px/1.2 var(--font-body);background:{{ corruptBg }};color:{{ corruptFg }}"><span style="width:8px;height:8px;background:currentColor"></span>Corrupt payload schema</button>
+                <button onClick="{{ toggleBudget }}" style="all:unset;cursor:pointer;display:flex;align-items:center;gap:10px;border:2px solid var(--color-text);padding:9px 11px;font:600 11.5px/1.2 var(--font-body);background:{{ budgetBg }};color:{{ budgetFg }}"><span style="width:8px;height:8px;background:currentColor"></span>Exhaust BLS request budget</button>
+              </div>
+            </div>
+          </sc-if>
+
+          <div style="padding:18px 20px;flex:1">
+            <span style="font:600 10.5px/1.2 var(--font-body);letter-spacing:.14em;text-transform:uppercase;color:var(--color-neutral-700)">Event log</span>
+            <div style="display:flex;flex-direction:column;gap:5px;margin-top:10px">
+              <sc-for list="{{ logs }}" as="l" hint-placeholder-count="9">
+                <div style="display:flex;gap:8px;font:400 10.5px/1.4 var(--font-body);font-variant-numeric:tabular-nums">
+                  <span style="color:var(--color-neutral-600);flex:none">{{ l.ts }}</span>
+                  <span style="color:{{ l.tone }}">{{ l.msg }}</span>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+        </aside>
+      </div>
+    </div>
+
+    <div style="display:flex;justify-content:space-between;gap:32px;margin-top:14px;min-width:1180px;font:400 11px/1.5 var(--font-body);color:var(--color-neutral-600)">
+      <span>Sources: US Department of the Treasury daily par yield curve (home.treasury.gov) · Bureau of Labor Statistics public API v2 · Alpha Vantage, used only as an independent second opinion. No API keys, no server — every request originates in this page.</span>
+      <span style="flex:none">Compiled {{ compiledAt }}</span>
+    </div>
+  </div>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;refreshSeconds&quot;:{&quot;editor&quot;:&quot;range&quot;,&quot;default&quot;:15,&quot;min&quot;:5,&quot;max&quot;:120,&quot;step&quot;:5,&quot;unit&quot;:&quot;s&quot;,&quot;tsType&quot;:&quot;number&quot;,&quot;section&quot;:&quot;Pipeline&quot;},&quot;maxConcurrency&quot;:{&quot;editor&quot;:&quot;int&quot;,&quot;default&quot;:3,&quot;min&quot;:1,&quot;max&quot;:6,&quot;tsType&quot;:&quot;number&quot;,&quot;section&quot;:&quot;Pipeline&quot;},&quot;showFaultControls&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Pipeline&quot;}}">
+class Component extends DCLogic {
+  state = {
+    tick: 0, nextIn: 0, stage: null, stageDetail: {}, logs: [],
+    health: {}, reqs: 0, hits: 0, retries: 0, rejects: 0, blsUsed: 0,
+    faults: { kill: false, slow: false, corrupt: false, budget: false }, now: Date.now()
+  };
+
+  LS = 'usmb.cache.v2';
+  BLS_CAP = 25;
+
+  MATS = [
+    { k: 'BC_1MONTH', label: '1M', yrs: 1 / 12 },
+    { k: 'BC_2MONTH', label: '2M', yrs: 2 / 12 },
+    { k: 'BC_3MONTH', label: '3M', yrs: 3 / 12 },
+    { k: 'BC_4MONTH', label: '4M', yrs: 4 / 12 },
+    { k: 'BC_6MONTH', label: '6M', yrs: 0.5 },
+    { k: 'BC_1YEAR', label: '1Y', yrs: 1 },
+    { k: 'BC_2YEAR', label: '2Y', yrs: 2 },
+    { k: 'BC_3YEAR', label: '3Y', yrs: 3 },
+    { k: 'BC_5YEAR', label: '5Y', yrs: 5 },
+    { k: 'BC_7YEAR', label: '7Y', yrs: 7 },
+    { k: 'BC_10YEAR', label: '10Y', yrs: 10 },
+    { k: 'BC_20YEAR', label: '20Y', yrs: 20 },
+    { k: 'BC_30YEAR', label: '30Y', yrs: 30 }
+  ];
+
+  TABLE_MATS = ['BC_3MONTH', 'BC_1YEAR', 'BC_2YEAR', 'BC_5YEAR', 'BC_10YEAR', 'BC_20YEAR', 'BC_30YEAR'];
+
+  SRC = [
+    { id: 'curve', prov: 'UST', kind: 'treasury', ttl: 3600, label: 'Daily par yield curve, all maturities' },
+    { id: 'nfp', prov: 'BLS', kind: 'bls', series: 'CES0000000001', ttl: 21600, label: 'Total non-farm payrolls, SA' },
+    { id: 'cpi', prov: 'BLS', kind: 'bls', series: 'CUSR0000SA0', ttl: 21600, label: 'CPI-U all items, SA' },
+    { id: 'core', prov: 'BLS', kind: 'bls', series: 'CUSR0000SA0L1E', ttl: 21600, label: 'CPI-U less food & energy, SA' },
+    { id: 'unrate', prov: 'BLS', kind: 'bls', series: 'LNS14000000', ttl: 21600, label: 'Unemployment rate, SA' },
+    { id: 'ahe', prov: 'BLS', kind: 'bls', series: 'CES0500000003', ttl: 21600, label: 'Average hourly earnings, SA' },
+    { id: 'avNfp', prov: 'AV', kind: 'av', fn: 'NONFARM_PAYROLL', ttl: 21600, label: 'Non-farm payrolls (second opinion)' },
+    { id: 'avCpi', prov: 'AV', kind: 'av', fn: 'CPI', ttl: 21600, label: 'CPI index (second opinion)' }
+  ];
+
+  cache = {};
+  busy = false;
+  lastCycle = 0;
+  pendingForce = false;
+
+  componentDidMount() {
+    try {
+      const raw = localStorage.getItem(this.LS);
+      if (raw) {
+        const c = JSON.parse(raw);
+        if (c && typeof c === 'object') {
+          this.cache = c;
+          this.setState({ health: this.hydratedHealth() });
+          this.log('cache hydrated from localStorage — ' + Object.keys(c).length + ' series painted before first request', 'info');
+        }
+      }
+    } catch (e) { /* cold start */ }
+    this.log('scheduler start · ' + this.SRC.length + ' series · 3 providers', 'info');
+    this.cycle(false);
+    // Cycles are anchored to wall-clock boundaries (epoch multiples of the
+    // interval), so a 15s cadence fires at :00/:15/:30/:45 of every minute and
+    // all boards tick in step regardless of when each page was opened.
+    this.lastBoundary = Math.floor(Date.now() / (this.interval() * 1000)) * (this.interval() * 1000);
+    this.clock = setInterval(() => {
+      const iv = this.interval() * 1000;
+      const nowMs = Date.now();
+      const boundary = Math.floor(nowMs / iv) * iv;
+      this.setState({ nextIn: Math.max(0, Math.ceil((boundary + iv - nowMs) / 1000)), now: nowMs });
+      if (boundary > this.lastBoundary && !this.busy) {
+        this.lastBoundary = boundary;
+        this.cycle(false);
+      }
+    }, 1000);
+  }
+
+  componentWillUnmount() { clearInterval(this.clock); }
+
+  interval() { return Math.max(5, Number(this.props.refreshSeconds) || 15); }
+  conc() { return Math.max(1, Number(this.props.maxConcurrency) || 3); }
+  wait(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+  log(msg, tone) {
+    const ts = new Date().toLocaleTimeString('en-GB', { hour12: false });
+    this.setState(s => ({ logs: [{ ts: ts, msg: msg, tone: tone || 'info' }].concat(s.logs).slice(0, 11) }));
+  }
+
+  schemaError(m) { const e = new Error(m); e.schema = true; return e; }
+
+  parseTreasury(text) {
+    const doc = new DOMParser().parseFromString(text, 'application/xml');
+    if (doc.getElementsByTagName('parsererror').length) throw this.schemaError('XML did not parse');
+    const entries = doc.getElementsByTagName('entry');
+    if (!entries.length) throw this.schemaError('no <entry> elements in Treasury feed');
+    const rows = [];
+    for (const e of entries) {
+      const props = e.getElementsByTagName('m:properties')[0] || e.getElementsByTagName('properties')[0];
+      if (!props) continue;
+      const rec = { t: '', vals: {} };
+      for (const n of props.children) {
+        const tag = n.tagName.replace(/^d:/, '');
+        if (tag === 'NEW_DATE') rec.t = (n.textContent || '').slice(0, 10);
+        else if (tag.indexOf('BC_') === 0) {
+          const v = parseFloat(n.textContent);
+          if (isFinite(v)) rec.vals[tag] = v;
+        }
+      }
+      if (rec.t) rows.push(rec);
+    }
+    if (!rows.length) throw this.schemaError('Treasury feed had no dated observations');
+    rows.sort((a, b) => a.t < b.t ? -1 : 1);
+    return rows;
+  }
+
+  parseBls(text) {
+    const j = JSON.parse(text);
+    if (j.status && j.status !== 'REQUEST_SUCCEEDED') throw this.schemaError('BLS: ' + (j.message && j.message.length ? j.message.join('; ') : j.status));
+    const ser = j.Results && j.Results.series && j.Results.series[0];
+    if (!ser || !Array.isArray(ser.data)) throw this.schemaError('BLS envelope missing Results.series[0].data');
+    const rows = ser.data
+      .filter(d => d.period && d.period.charAt(0) === 'M' && d.period !== 'M13')
+      .map(d => ({
+        t: d.year + '-' + d.period.slice(1),
+        v: parseFloat(d.value),
+        prelim: !!(d.footnotes || []).some(f => f && f.code === 'P')
+      }));
+    rows.sort((a, b) => a.t < b.t ? -1 : 1);
+    return rows;
+  }
+
+  parseAv(text) {
+    const j = JSON.parse(text);
+    if (j.Information || j.Note) throw this.schemaError('rate limited by provider');
+    if (!Array.isArray(j.data)) throw this.schemaError('Alpha Vantage envelope missing data array');
+    const rows = j.data.map(d => ({ t: String(d.date).slice(0, 7), v: parseFloat(d.value) })).filter(r => isFinite(r.v));
+    rows.sort((a, b) => a.t < b.t ? -1 : 1);
+    return rows;
+  }
+
+  validate(rows, src) {
+    if (!rows.length) return 'empty observation set';
+    if (src.kind === 'treasury') {
+      const withTen = rows.filter(r => isFinite(r.vals.BC_10YEAR));
+      if (!withTen.length) return 'no 10-year observation in curve';
+      const bad = withTen.filter(r => r.vals.BC_10YEAR < 0 || r.vals.BC_10YEAR > 25);
+      if (bad.length) return 'yield outside plausible range';
+      return null;
+    }
+    const good = rows.filter(r => isFinite(r.v));
+    if (!good.length) return 'no finite observations';
+    if (good.length < rows.length * 0.5) return 'over half of observations non-numeric';
+    return null;
+  }
+
+  corrupt(rows, src) {
+    if (src.kind === 'treasury') return rows.map((r, i) => i % 2 === 0 ? { t: r.t, vals: {} } : r);
+    return rows.map((r, i) => i % 2 === 0 ? { t: r.t, v: NaN, prelim: r.prelim } : r);
+  }
+
+  url(src) {
+    const yr = new Date().getFullYear();
+    if (src.kind === 'treasury') return 'https://home.treasury.gov/resource-center/data-chart-center/interest-rates/pages/xml?data=daily_treasury_yield_curve&field_tdr_date_value=' + yr;
+    if (src.kind === 'bls') return 'https://api.bls.gov/publicAPI/v2/timeseries/data/' + src.series + '?startyear=' + (yr - 2) + '&endyear=' + yr;
+    return 'https://www.alphavantage.co/query?function=' + src.fn + (src.fn === 'CPI' ? '&interval=monthly' : '') + '&apikey=demo';
+  }
+
+  async fetchOne(src) {
+    const t0 = performance.now();
+    const f = this.state.faults;
+    if (f.slow) await this.wait(2000);
+    if (f.kill && src.prov === 'BLS') throw new Error('ECONNREFUSED (injected)');
+    if (src.prov === 'BLS') {
+      const cap = f.budget ? 0 : this.BLS_CAP;
+      if (this.state.blsUsed >= cap) { const e = new Error('daily request budget exhausted'); e.budget = true; throw e; }
+      this.setState(s => ({ blsUsed: s.blsUsed + 1 }));
+    }
+    this.setState(s => ({ reqs: s.reqs + 1 }));
+    const res = await fetch(this.url(src), { cache: 'no-store' });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const text = await res.text();
+    let rows = src.kind === 'treasury' ? this.parseTreasury(text) : src.kind === 'bls' ? this.parseBls(text) : this.parseAv(text);
+    if (f.corrupt) rows = this.corrupt(rows, src);
+    const bad = this.validate(rows, src);
+    if (bad) throw this.schemaError(bad);
+    return { rows: rows, latency: Math.round(performance.now() - t0), fetchedAt: Date.now() };
+  }
+
+  async load(src) {
+    for (let attempt = 1; attempt <= 3; attempt++) {
+      try {
+        const r = await this.fetchOne(src);
+        this.cache[src.id] = { rows: r.rows, fetchedAt: r.fetchedAt, latency: r.latency };
+        this.setHealth(src.id, { state: attempt > 1 ? 'recovered' : 'ok', latency: r.latency, fetchedAt: r.fetchedAt });
+        if (attempt > 1) this.log(src.id + ' recovered on attempt ' + attempt, 'ok');
+        return;
+      } catch (e) {
+        if (e.budget) {
+          this.setHealth(src.id, { state: 'budget' });
+          this.log(src.id + ' skipped — ' + e.message + ', serving cached print until tomorrow', 'warn');
+          return;
+        }
+        if (e.schema) {
+          this.setState(s => ({ rejects: s.rejects + 1 }));
+          this.setHealth(src.id, { state: 'rejected' });
+          this.log(src.id + ' payload rejected: ' + e.message + ' — not retried, holding last good', 'error');
+          return;
+        }
+        if (attempt === 3) {
+          this.setHealth(src.id, { state: this.cache[src.id] ? 'stale' : 'down' });
+          this.log(src.id + ' failed after 3 attempts (' + e.message + ')' + (this.cache[src.id] ? ' — serving last known good' : ''), 'error');
+          return;
+        }
+        const back = 300 * Math.pow(2, attempt - 1) + Math.round(Math.random() * 120);
+        this.setState(s => ({ retries: s.retries + 1 }));
+        this.setHealth(src.id, { state: 'retry' });
+        this.log(src.id + ' ' + e.message + ' — retry ' + attempt + ' in ' + back + 'ms', 'warn');
+        await this.wait(back);
+      }
+    }
+  }
+
+  setHealth(id, patch) {
+    this.setState(s => {
+      const h = Object.assign({}, s.health);
+      h[id] = Object.assign({}, h[id], patch);
+      return { health: h };
+    });
+  }
+
+  hydratedHealth() {
+    const h = {};
+    for (const src of this.SRC) if (this.cache[src.id]) h[src.id] = { state: 'cached', latency: this.cache[src.id].latency, fetchedAt: this.cache[src.id].fetchedAt };
+    return h;
+  }
+
+  async cycle(force) {
+    if (this.busy) {
+      if (force) { this.pendingForce = true; this.log('revalidate queued — cycle already in flight', 'warn'); }
+      return;
+    }
+    this.busy = true;
+    this.lastCycle = Date.now();
+    const t0 = performance.now();
+    this.setState(s => ({ tick: s.tick + 1 }));
+
+    const due = [], fresh = [];
+    for (const src of this.SRC) {
+      const c = this.cache[src.id];
+      ((c && !force && (Date.now() - c.fetchedAt) < src.ttl * 1000) ? fresh : due).push(src);
+    }
+    if (fresh.length) {
+      this.setState(s => ({ hits: s.hits + fresh.length }));
+      for (const src of fresh) this.setHealth(src.id, { state: 'cached' });
+    }
+    this.setState({ stage: 'fetch', stageDetail: { fetch: due.length + ' due · ' + fresh.length + ' within TTL' } });
+    this.log('cycle ' + (this.state.tick + 1) + ': ' + due.length + ' series due, ' + fresh.length + ' served from cache', 'info');
+
+    let done = 0;
+    const queue = due.slice();
+    const lanes = [];
+    for (let i = 0; i < this.conc(); i++) {
+      lanes.push((async () => {
+        while (queue.length) {
+          await this.load(queue.shift());
+          done++;
+          this.setState(s => ({ stageDetail: Object.assign({}, s.stageDetail, { fetch: done + '/' + due.length + ' resolved' }) }));
+        }
+      })());
+    }
+    await Promise.all(lanes);
+
+    if (due.length) {
+      this.setState(s => ({ stage: 'validate', stageDetail: Object.assign({}, s.stageDetail, { validate: due.length + ' payloads checked' }) }));
+      await this.wait(220);
+      this.setState({ stage: 'transform' });
+      await this.wait(220);
+      this.setState({ stage: 'cache' });
+      try { localStorage.setItem(this.LS, JSON.stringify(this.cache)); } catch (e) { this.log('cache write failed: quota', 'warn'); }
+      await this.wait(140);
+    }
+    this.setState({ stage: 'render', cycleMs: Math.round(performance.now() - t0) });
+    this.log('cycle complete in ' + Math.round(performance.now() - t0) + 'ms', 'ok');
+    await this.wait(500);
+    this.setState({ stage: null });
+    this.busy = false;
+    if (this.pendingForce) { this.pendingForce = false; this.log('running queued revalidate', 'info'); this.cycle(true); }
+  }
+
+  refresh = () => {
+    if (!this.busy) this.log('manual revalidate — all TTLs bypassed', 'info');
+    this.cycle(true);
+  };
+
+  toggleFault = (k, label) => {
+    this.setState(s => {
+      const f = Object.assign({}, s.faults);
+      f[k] = !f[k];
+      return { faults: f };
+    }, () => {
+      this.log((this.state.faults[k] ? 'FAULT INJECTED — ' : 'fault cleared — ') + label, this.state.faults[k] ? 'error' : 'ok');
+      this.cycle(true);
+    });
+  };
+
+  rows(id) { return (this.cache[id] || {}).rows || []; }
+  last(id) {
+    const r = this.rows(id);
+    for (let i = r.length - 1; i >= 0; i--) if (isFinite(r[i].v)) return r[i];
+    return null;
+  }
+  lastCurve() {
+    const r = this.rows('curve');
+    for (let i = r.length - 1; i >= 0; i--) if (r[i].vals && isFinite(r[i].vals.BC_10YEAR)) return r[i];
+    return null;
+  }
+  yoy(id) {
+    const r = this.rows(id).filter(x => isFinite(x.v));
+    if (r.length < 13) return null;
+    const cur = r[r.length - 1], prev = r[r.length - 13];
+    if (!prev || !prev.v) return null;
+    return { v: (cur.v / prev.v - 1) * 100, ref: cur.t };
+  }
+
+  n(v, d) { return (v === null || v === undefined || !isFinite(v)) ? '—' : Number(v).toFixed(d === undefined ? 2 : d); }
+  pc(v, d) { return (v === null || v === undefined || !isFinite(v)) ? '—' : Number(v).toFixed(d === undefined ? 2 : d) + '%'; }
+  sg(v, d) { if (v === null || v === undefined || !isFinite(v)) return '—'; return (v >= 0 ? '+' : '') + Number(v).toFixed(d === undefined ? 2 : d) + '%'; }
+  ago(ms) {
+    if (!ms) return '—';
+    const s = Math.round((Date.now() - ms) / 1000);
+    if (s < 60) return s + 's';
+    if (s < 3600) return Math.round(s / 60) + 'm';
+    if (s < 86400) return Math.round(s / 3600) + 'h';
+    return Math.round(s / 86400) + 'd';
+  }
+  monthName(t) {
+    if (!t) return '—';
+    const p = t.split('-');
+    const names = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    return (names[Number(p[1]) - 1] || '?') + ' ' + p[0];
+  }
+  monthLag(ref) {
+    if (!ref) return '—';
+    const p = ref.split('-');
+    if (p.length < 2) return '—';
+    const d = new Date();
+    return ((d.getFullYear() - Number(p[0])) * 12 + (d.getMonth() + 1 - Number(p[1]))) + ' mo';
+  }
+
+  renderVals() {
+    const DARK = '#201e1d', RED = 'var(--color-accent-700)', GREY = 'var(--color-neutral-700)';
+    const cur = this.lastCurve();
+    const cpiY = this.yoy('cpi'), coreY = this.yoy('core'), aheY = this.yoy('ahe');
+    const cpi = cpiY ? cpiY.v : null;
+    const unrateRow = this.last('unrate');
+    const nfpRows = this.rows('nfp').filter(r => isFinite(r.v));
+    const nfpLast = nfpRows[nfpRows.length - 1] || null;
+    const nfpPrev = nfpRows[nfpRows.length - 2] || null;
+    const nfpDelta = (nfpLast && nfpPrev) ? nfpLast.v - nfpPrev.v : null;
+    const y10 = cur ? cur.vals.BC_10YEAR : null;
+    const y2 = cur ? cur.vals.BC_2YEAR : null;
+    const real10 = (isFinite(y10) && cpi !== null) ? y10 - cpi : null;
+    const slopeBp = (isFinite(y10) && isFinite(y2)) ? (y10 - y2) * 100 : null;
+    const realWage = (aheY && cpi !== null) ? aheY.v - cpi : null;
+
+    const W = 600, H = 200;
+    const pts = cur ? this.MATS.filter(m => isFinite(cur.vals[m.k])).map(m => ({ m: m, v: cur.vals[m.k] })) : [];
+    const curve = { nominal: '', real: '', band: '', ticks: [], pts: [], zeroY: H, labels: [] };
+    if (pts.length > 1) {
+      const reals = cpi === null ? [] : pts.map(p => p.v - cpi);
+      const all = pts.map(p => p.v).concat(reals).concat([0]);
+      let lo = Math.min.apply(null, all), hi = Math.max.apply(null, all);
+      const pad = ((hi - lo) || 1) * 0.14;
+      lo -= pad; hi += pad;
+      const lx = Math.log(pts[0].m.yrs), hx = Math.log(pts[pts.length - 1].m.yrs);
+      const X = yrs => (Math.log(yrs) - lx) / (hx - lx) * W;
+      const Y = v => H - (v - lo) / (hi - lo) * H;
+      curve.nominal = pts.map((p, i) => (i ? 'L' : 'M') + X(p.m.yrs).toFixed(1) + ' ' + Y(p.v).toFixed(1)).join(' ');
+      curve.pts = pts.map(p => ({ x: X(p.m.yrs).toFixed(1), y: Y(p.v).toFixed(1) }));
+      if (cpi !== null) {
+        curve.real = pts.map((p, i) => (i ? 'L' : 'M') + X(p.m.yrs).toFixed(1) + ' ' + Y(p.v - cpi).toFixed(1)).join(' ');
+        const back = pts.slice().reverse().map(p => 'L' + X(p.m.yrs).toFixed(1) + ' ' + Y(p.v - cpi).toFixed(1)).join(' ');
+        curve.band = curve.nominal + ' ' + back + ' Z';
+      }
+      curve.zeroY = Y(0).toFixed(1);
+      const step = (hi - lo) / 4;
+      for (let i = 1; i <= 4; i++) {
+        const v = lo + step * i;
+        curve.ticks.push({ y: Y(v).toFixed(1), v: v.toFixed(1) + '%', pct: (Y(v) / H * 100).toFixed(1) + '%' });
+      }
+      curve.labels = ['1M', '3M', '6M', '1Y', '2Y', '5Y', '10Y', '30Y'].map(t => {
+        const m = this.MATS.find(x => x.label === t);
+        return { t: t, pct: (X(m.yrs) / W * 100).toFixed(2) + '%' };
+      });
+    }
+
+    const rates = this.TABLE_MATS.map(k => {
+      const m = this.MATS.find(x => x.k === k);
+      const v = cur ? cur.vals[k] : null;
+      const real = (isFinite(v) && cpi !== null) ? v - cpi : null;
+      return {
+        label: m.label === '3M' ? '3 months' : m.label === '1Y' ? '1 year' : m.label.replace('Y', ' years'),
+        key: k,
+        nominal: isFinite(v) ? this.pc(v) : '—',
+        minus: cpi === null ? '—' : '−' + this.n(cpi) + '%',
+        real: real === null ? '—' : this.sg(real),
+        tone: real === null ? GREY : (real >= 0 ? DARK : RED),
+        asOf: cur ? cur.t : '—'
+      };
+    });
+
+    const bars = nfpRows.slice(-13);
+    const deltas = [];
+    for (let i = 1; i < bars.length; i++) deltas.push({ t: bars[i].t, d: bars[i].v - bars[i - 1].v, prelim: bars[i].prelim });
+    const maxAbs = deltas.length ? Math.max.apply(null, deltas.map(x => Math.abs(x.d))) || 1 : 1;
+    const BW = 260, BH = 52, zeroY = BH / 2;
+    const nfpBars = deltas.map((x, i) => {
+      const w = BW / deltas.length * 0.68;
+      const h = Math.abs(x.d) / maxAbs * (BH / 2 - 2);
+      return {
+        x: (i * (BW / deltas.length) + (BW / deltas.length - w) / 2).toFixed(1),
+        y: (x.d >= 0 ? zeroY - h : zeroY).toFixed(1),
+        w: w.toFixed(1), h: Math.max(h, 0.8).toFixed(1),
+        fill: x.prelim ? 'var(--color-accent-400)' : (x.d >= 0 ? 'var(--color-text)' : 'var(--color-accent)')
+      };
+    });
+
+    const avNfp = this.rows('avNfp'), avCpi = this.rows('avCpi');
+    const findAt = (arr, t) => arr.find(r => r.t === t) || null;
+    const recon = [];
+    if (nfpLast) {
+      const b = findAt(avNfp, nfpLast.t);
+      const d = b ? nfpLast.v - b.v : null;
+      recon.push({
+        label: 'Non-farm payrolls', period: this.monthName(nfpLast.t),
+        a: (nfpLast.v / 1000).toFixed(2) + 'm', b: b ? (b.v / 1000).toFixed(2) + 'm' : '—',
+        delta: d === null ? '—' : (d >= 0 ? '+' : '') + Math.round(d).toLocaleString() + 'k',
+        tone: d === null ? GREY : (Math.abs(d) > 100 ? RED : DARK),
+        note: d === null ? 'Second opinion unavailable for this reference month.'
+          : Math.abs(d) > 100 ? 'Material gap. Both claim the same concept, so at least one is a different vintage or benchmark. BLS is authoritative; the mirror is stale.'
+          : 'Within rounding of each other — the mirror is tracking the current BLS vintage.'
+      });
+    }
+    const cpiLastRow = this.rows('cpi').filter(r => isFinite(r.v)).slice(-1)[0];
+    if (cpiLastRow) {
+      const b = findAt(avCpi, cpiLastRow.t);
+      const d = b ? cpiLastRow.v - b.v : null;
+      recon.push({
+        label: 'CPI-U index level', period: this.monthName(cpiLastRow.t),
+        a: this.n(cpiLastRow.v, 3), b: b ? this.n(b.v, 3) : '—',
+        delta: d === null ? '—' : (d >= 0 ? '+' : '') + this.n(d, 3),
+        tone: d === null ? GREY : (Math.abs(d) > 1 ? RED : DARK),
+        note: d === null ? 'Second opinion unavailable for this reference month.'
+          : Math.abs(d) > 1 ? 'Gap exceeds one index point — almost certainly seasonally adjusted against not seasonally adjusted.'
+          : 'Agreement to within one index point.'
+      });
+    }
+    const bigGap = recon.some(r => r.tone === RED);
+    const reconVerdict = !recon.length ? 'awaiting data' : bigGap ? 'divergence — not reconciled' : 'sources agree';
+    const reconBg = !recon.length ? 'var(--color-neutral-300)' : bigGap ? 'var(--color-accent)' : 'var(--color-neutral-900)';
+    const reconFg = !recon.length ? '#201e1d' : '#ffffff';
+
+    const h = this.state.health;
+    const stageOrder = [
+      ['fetch', 'FETCH', this.state.stageDetail.fetch || (this.SRC.length + ' series · TTL checked')],
+      ['validate', 'VALIDATE', this.state.stageDetail.validate || 'schema · range · completeness'],
+      ['transform', 'TRANSFORM', 'nominal → real · YoY · deltas'],
+      ['cache', 'CACHE', Object.keys(this.cache).length + ' series persisted'],
+      ['render', 'RENDER', (this.state.cycleMs || 0) + 'ms last cycle']
+    ];
+    const idx = stageOrder.findIndex(s => s[0] === this.state.stage);
+    const stages = stageOrder.map((s, i) => ({
+      name: s[1], detail: s[2],
+      bg: this.state.stage === s[0] ? 'var(--color-accent)' : (idx === -1 || i < idx ? 'var(--color-neutral-900)' : 'var(--color-neutral-400)'),
+      anim: this.state.stage === s[0] ? 'msdPulse 1s infinite' : 'none'
+    }));
+
+    const stateStyle = {
+      ok: ['var(--color-neutral-900)', '#f3f2f2'], recovered: ['var(--color-neutral-900)', '#f3f2f2'],
+      cached: ['var(--color-neutral-300)', '#201e1d'], retry: ['var(--color-accent-300)', '#7c1405'],
+      stale: ['var(--color-accent-400)', '#4d170e'], rejected: ['var(--color-accent)', '#ffffff'],
+      down: ['var(--color-accent)', '#ffffff'], budget: ['var(--color-accent-300)', '#7c1405'],
+      pending: ['var(--color-neutral-200)', '#7d7979']
+    };
+    const sources = this.SRC.map(src => {
+      const st = (h[src.id] || {}).state || 'pending';
+      const cc = this.cache[src.id];
+      const sty = stateStyle[st] || stateStyle.pending;
+      return {
+        id: src.id, prov: src.prov,
+        latency: (h[src.id] && h[src.id].latency) || (cc && cc.latency) || '—',
+        age: cc ? this.ago(cc.fetchedAt) : '—',
+        state: st, bg: sty[0], fg: sty[1]
+      };
+    });
+    const okStates = { ok: 1, recovered: 1, cached: 1 };
+    const feedsOk = sources.filter(s => okStates[s.state]).length;
+
+    const releases = [
+      { name: 'Treasury curve', detail: cur ? cur.t + ' · ' + this.ago(this.cache.curve && this.cache.curve.fetchedAt) + ' old · daily ~15:30 ET' : 'pending' },
+      { name: 'Payrolls', detail: nfpLast ? this.monthName(nfpLast.t) + ' · lag ' + this.monthLag(nfpLast.t) + (nfpLast.prelim ? ' · preliminary' : ' · final') : 'pending' },
+      { name: 'CPI-U', detail: cpiY ? this.monthName(cpiY.ref) + ' · lag ' + this.monthLag(cpiY.ref) : 'pending' },
+      { name: 'Unemployment', detail: unrateRow ? this.monthName(unrateRow.t) + ' · lag ' + this.monthLag(unrateRow.t) : 'pending' },
+      { name: 'Hourly earnings', detail: aheY ? this.monthName(aheY.ref) + ' · lag ' + this.monthLag(aheY.ref) : 'pending' }
+    ];
+
+    const toneMap = { info: 'var(--color-neutral-800)', ok: 'var(--color-neutral-900)', warn: 'var(--color-accent-700)', error: 'var(--color-accent)' };
+    const logs = this.state.logs.map(l => ({ ts: l.ts, msg: l.msg, tone: toneMap[l.tone] }));
+
+    const reading = [];
+    if (isFinite(y10) && cpi !== null) {
+      reading.push('The 10-year Treasury pays ' + this.pc(y10) + ' against CPI of ' + this.pc(cpi, 1) + ', leaving about ' + this.sg(real10) + ' in real terms — ' + (real10 >= 1 ? 'a genuinely positive real rate, which is what a normalised cost of capital looks like.' : real10 >= 0 ? 'positive but thin: barely compensation for locking money up for a decade.' : 'negative in real terms, which quietly transfers value from savers to borrowers.'));
+    }
+    if (slopeBp !== null) {
+      reading.push(slopeBp >= 0
+        ? 'The 10Y−2Y spread is ' + Math.round(slopeBp) + 'bp and upward sloping — the front end is not pricing an imminent collapse in short rates, so no recession is being underwritten by the curve.'
+        : 'The 10Y−2Y spread is ' + Math.round(slopeBp) + 'bp — inverted. Short money costs more than long, historically a slowdown signal rather than a forecast.');
+    }
+    if (realWage !== null) {
+      reading.push('Average hourly earnings are up ' + this.pc(aheY.v, 2) + ' over the year while prices rose ' + this.pc(cpi, 2) + ', so real pay is ' + this.sg(realWage, 2) + '. ' + (realWage > 0.5 ? 'Workers are meaningfully ahead of prices.' : realWage > 0 ? 'Workers are ahead of prices, but only just — the nominal figure flatters it.' : 'Nominal pay rose and purchasing power still fell; the headline wage number is misleading on its own.'));
+    }
+    if (nfpDelta !== null && nfpLast) {
+      reading.push('Payrolls changed by ' + (nfpDelta >= 0 ? '+' : '') + Math.round(nfpDelta).toLocaleString() + 'k in ' + this.monthName(nfpLast.t) + ' to ' + (nfpLast.v / 1000).toFixed(2) + 'm jobs, with unemployment at ' + (unrateRow ? this.pc(unrateRow.v, 1) : '—') + '. ' + (nfpLast.prelim ? 'That print is still flagged preliminary by BLS and will be revised — treat the sign with more confidence than the magnitude.' : 'That print has settled into its final vintage.'));
+    }
+    if (recon.length && bigGap) {
+      reading.push('Two providers were asked for the same headline series and returned different numbers (' + recon[0].a + ' against ' + recon[0].b + '). Neither is averaged away here: BLS is the source of record, the mirror is shown beside it, and the gap is displayed rather than resolved. Knowing which source is authoritative is part of the data model, not a footnote.');
+    }
+    reading.push('Everything above was fetched in this browser with no API key and no server: ' + this.SRC.length + ' series across the US Treasury, BLS and one independent mirror, with per-series TTLs derived from publication cadence and BLS\u2019s ' + this.BLS_CAP + '-request daily cap, ' + this.conc() + '-way concurrency, retry with backoff, schema rejection without retry, and last-known-good on failure. Publication lag is tracked separately from fetch latency — they are different kinds of stale.');
+
+    const f = this.state.faults;
+    const fb = on => on ? 'var(--color-accent)' : 'transparent';
+    const ff = on => on ? '#ffffff' : 'var(--color-text)';
+    const blsUsed = this.state.blsUsed;
+
+    return {
+      tick: this.state.tick, nextIn: this.state.nextIn, conc: this.conc(),
+      reqs: this.state.reqs, hits: this.state.hits, retries: this.state.retries, rejects: this.state.rejects,
+      rejectTone: this.state.rejects ? 'var(--color-accent)' : 'var(--color-text)',
+      hitRate: (this.state.hits + this.state.reqs) ? Math.round(this.state.hits / (this.state.hits + this.state.reqs) * 100) + '%' : '—',
+      feedsOk: feedsOk, feedsTotal: this.SRC.length,
+      blsUsed: blsUsed, blsCap: this.BLS_CAP, blsTtlLabel: '6-hour',
+      budgetTone: blsUsed >= this.BLS_CAP ? 'var(--color-accent)' : blsUsed > this.BLS_CAP * 0.6 ? 'var(--color-accent-700)' : 'var(--color-text)',
+      compiledAt: new Date(this.state.now).toLocaleString('en-GB', { hour12: false }),
+      curveDate: cur ? cur.t : '—',
+      nom10: isFinite(y10) ? this.pc(y10) : '—',
+      real10: real10 === null ? '—' : this.sg(real10),
+      slope: slopeBp === null ? '—' : (slopeBp >= 0 ? '+' : '') + Math.round(slopeBp) + 'bp',
+      curveNominal: curve.nominal, curveReal: curve.real, curveBand: curve.band,
+      curveTicks: curve.ticks, curvePts: curve.pts, curveZeroY: curve.zeroY, curveLabels: curve.labels,
+      cpiYoY: cpi === null ? '—' : this.pc(cpi, 1), cpiRef: cpiY ? this.monthName(cpiY.ref) : '—',
+      coreYoY: coreY ? this.pc(coreY.v, 1) : '—',
+      aheYoY: aheY ? this.pc(aheY.v, 2) : '—',
+      cpiYoY2: cpi === null ? '—' : this.pc(cpi, 2),
+      realWage: realWage === null ? '—' : this.sg(realWage, 2),
+      realWageTone: realWage === null ? GREY : (realWage >= 0 ? DARK : RED),
+      nfpRef: nfpLast ? this.monthName(nfpLast.t) : '—',
+      nfpLevel: nfpLast ? (nfpLast.v / 1000).toFixed(2) + 'm' : '—',
+      nfpChange: nfpDelta === null ? '—' : (nfpDelta >= 0 ? '+' : '') + Math.round(nfpDelta).toLocaleString() + 'k',
+      nfpFlag: nfpLast ? (nfpLast.prelim ? 'preliminary — will revise' : 'final vintage') : 'pending',
+      nfpFlagBg: nfpLast && nfpLast.prelim ? 'var(--color-accent-300)' : 'var(--color-neutral-300)',
+      nfpFlagFg: nfpLast && nfpLast.prelim ? '#7c1405' : '#201e1d',
+      nfpBars: nfpBars, nfpZeroY: zeroY,
+      unrate: unrateRow ? this.pc(unrateRow.v, 1) : '—',
+      rates: rates, recon: recon, reconVerdict: reconVerdict, reconBg: reconBg, reconFg: reconFg,
+      releases: releases, sources: sources, stages: stages, logs: logs, reading: reading,
+      showFaults: this.props.showFaultControls !== false,
+      refresh: this.refresh,
+      toggleKill: () => this.toggleFault('kill', 'BLS endpoint unreachable'),
+      toggleSlow: () => this.toggleFault('slow', '2s added network latency'),
+      toggleCorrupt: () => this.toggleFault('corrupt', 'payload schema corruption'),
+      toggleBudget: () => this.toggleFault('budget', 'BLS daily request budget exhausted'),
+      killBg: fb(f.kill), killFg: ff(f.kill), slowBg: fb(f.slow), slowFg: ff(f.slow),
+      corruptBg: fb(f.corrupt), corruptFg: ff(f.corrupt), budgetBg: fb(f.budget), budgetFg: ff(f.budget)
+    };
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,10 @@
+# Machine-local editor/tool settings — contain absolute paths to this machine
+.claude/
+
+# Artifact preview image, not source
+.thumbnail
+
+# OS / editor cruft
+Thumbs.db
+desktop.ini
+.DS_Store

@@ -1,0 +1,15 @@
+{
+  // .dc.html files carry {{ bindings }} inside inline style attributes, e.g.
+  //   style="top:{{ t.pct }}"  /  style="color:{{ r.tone }}"
+  // support.js substitutes these before the browser parses the style, but the
+  // built-in CSS validator sees them as malformed and reports
+  // "property value expected". Disabling style validation removes the false
+  // positives; HTML structure is still validated.
+  "html.validate.styles": false,
+
+  // <x-dc>, <helmet> and <sc-for> are runtime elements, not typos.
+  "html.customData": [],
+  "files.associations": {
+    "*.dc.html": "html"
+  }
+}
